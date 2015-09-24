@@ -69,7 +69,7 @@ def one_layer_tree_trnsdcr(head_op, *branch_ops, **bldargs):
 
 
 def preiter_iter_postiter(iter_fnc, pre_iter=pass_through, post_iter=pass_through,
-                          iter_bool=always_true, **bldargs):
+                          iter_bool=always_true, *_, **bldargs):
     """
     pre_iter - a function that modifies the incoming operand.
     iter_fnc - a function the splits the operand.
