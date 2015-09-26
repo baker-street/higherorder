@@ -11,11 +11,11 @@ def pass_through(obj, *_, **__):
     return obj
 
 
-def always_true(obj, *_, **__):
+def always_true(*_, **__):
     return True
 
 
-def always_false(obj, *_, **__):
+def always_false(*_, **__):
     return False
 
 
