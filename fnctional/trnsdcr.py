@@ -8,10 +8,10 @@ __created_on__ = '8/27/2015'
 from fnctional.__about__ import *
 
 from functools import partial
-from collections import defaultdict
+from collections import defaultdict, namedtuple
 
 
-from fnctional.utils import pass_through, always_true, _try_custom_name, _try_custom_doc
+from fnctional.utils import pass_through, always_true, _try_assign_name, _try_assign_doc
 
 
 # ------------------------------------------------------------------------------
@@ -46,6 +46,7 @@ def trnsdcr(procs, mdl_fnc=_run_if_not_none, **xargs):
 
 def one_layer_tree_trnsdcr(head_op, *branch_ops, **bldargs):
     """
+    - Uses names of functions as names of attributes
     ex:
         head_op - parses sentences.
         branch_ops - a list of 'tokenizers' that will tokenize the sentences in different ways.
@@ -54,15 +55,19 @@ def one_layer_tree_trnsdcr(head_op, *branch_ops, **bldargs):
         setsdict = {'setone': ['t1', 't2', ..., 'tn'],
                     'settwo': ['t1', 't2', ..., 'tn'],
                     }
+        ResTree(setone=['t1', 't2', ..., 'tn'],
+                settwo=['t1', 't2', ..., 'tn'])
     """
     def tree_func(operand, *_, **runargs):
         runargs.update(bldargs)
         posteriordict = defaultdict(list)
         for res in head_op(operand, *_, **runargs):
+            branchlist = []
             for b_op in branch_ops:
                 #  Assumes each branch function will have a differant name.
                 #  Could end up being a big problem.
-                posteriordict[b_op.__name__].extend(b_op(res))
+                branchlist.extend(list(b_op(res)))
+                ## posteriordict[b_op.__name__].extend(list(b_op(res)))
         return dict(posteriordict)
     tree_func.__name__ = _try_custom_name(fnc=tree_func, **bldargs)
     return tree_func
