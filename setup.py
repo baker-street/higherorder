@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 """
-fnctional  Copyright (C) 2015  Steven Cutting - License GPLv3: fnctional/LICENSE
+higherorder  Copyright (C) 2015  Steven Cutting - License GPLv3: higherorder/LICENSE
 """
 
-from fnctional import(__title__, __version__, __status__)
+from higherorder import(__title__, __version__, __status__)
 
 
 from setuptools import setup, find_packages
@@ -31,7 +31,7 @@ setup(name=__title__,
                    'Programming Language :: Python :: 2.7',
                    'Programming Language :: Python :: 3.4',
                    'License :: GPLv3',
-                   'Copyright :: fnctional  Copyright (C) 2015  Steven Cutting',
+                   'Copyright :: higherorder  Copyright (C) 2015  Steven Cutting',
                    'Status :: ' + __status__,
                    ],
       keywords='functional, tools, composition, functions, transducer',
