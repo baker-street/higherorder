@@ -1,0 +1,200 @@
+# -*- coding: utf-8 -*-
+__author__ = 'Steven Cutting'
+__author_email__ = 'steven.e.cutting@linux.com'
+__copyright__ = "higherorder  Copyright (C) 2015  Steven Cutting"
+__created_on__ = '9/17/2015'
+
+from higherorder.__about__ import *
+
+import sys
+from copy import deepcopy
+from collections import Iterable
+
+if sys.version_info[0] < 3:
+    _STRINGTYPES = (basestring,)
+else:
+    # temp fix, so that 2.7 support wont break
+    unicode = str  # adjusting to python3
+    _STRINGTYPES = (str, bytes)
+
+
+def pass_through(obj, *_, **__):
+    return obj
+
+
+def always_true(*_, **__):
+    return True
+
+
+def always_false(*_, **__):
+    return False
+
+
+def _try_assign_name(func, *_, **kwargs):
+    try:
+        return kwargs['__name__']
+    except KeyError:
+        try:
+            return func.__name__
+        except AttributeError:
+            return 'NoName'
+
+
+def _try_assign_doc(func, *_, **kwargs):
+    try:
+        return kwargs['__doc__']
+    except KeyError:
+        try:
+            return func.__doc__
+        except AttributeError:
+            return 'NoDoc'
+
+
+def _try_assign_type(func, *_, **kwargs):
+    """
+    Add custom dunder attribute to a function.
+    A type attribute.
+    __type__
+    """
+    try:
+        return kwargs['__type__']
+    except KeyError:
+        try:
+            return func.__type__
+        except AttributeError:
+            return 'NoType'
+
+
+def _try_assign_arg_checker(func, *_, **kwargs):
+    """
+    Add custom dunder attribute to a function.
+    A checker attribute.
+    __checker__
+
+    - checker - a function that can be optionally used to check the input to
+                the function it's assigned to.
+    """
+    try:
+        return kwargs['__checker__']
+    except KeyError:
+        try:
+            return func.__checker__
+        except AttributeError:
+            return pass_through
+
+
+def _try_assign_uuid(func, *_, **kwargs):
+    """
+    Add custom dunder attribute to a function.
+    A uuid attribute.
+    __uuid__
+    """
+    try:
+        return kwargs['__uuid__']
+    except KeyError:
+        try:
+            return func.__uuid__
+        except AttributeError:
+            return 'NoUUID'
+
+
+def _try_assign_desc(func, *_, **kwargs):
+    """
+    Add custom dunder attribute to a function.
+    A description attribute.
+    __desc__
+    """
+    try:
+        return kwargs['__desc__']
+    except KeyError:
+        try:
+            return func.__desc__
+        except AttributeError:
+            return 'NoDesc'
+
+
+def assign_new_var_func_attrs(func, *_, **kwargs):
+    newfunc = deepcopy(func)
+    for k, v in kwargs.items():
+        newfunc.__setattr__(k, v)
+    return newfunc
+
+
+def assign_new_func_attrs(**kwargs):
+    """
+    Is a decorator
+    Adds custom attributes to a function and can be used to replace
+    standard attributes.
+    - can replace or add any attribute. Use with care.
+    """
+    def _inner(func, *_, **__):
+        return assign_new_var_func_attrs(func=func, **kwargs)
+    return _inner
+
+
+def get_attr(func, attr='__name__'):
+    return func.__getattribute__(attr)
+
+
+# Try to make the flatten funcs suck a little less; too many loops and what not.
+def flatten_dict_tree(dicttree, __keypath=u''):
+    """
+    Flattens only the dicts in a dict tree.
+    """
+    newdict = {}
+    for key, value in dicttree.items():
+        fullkeypath = __keypath + '-' + key
+        if isinstance(value, dict):
+            newdict.update(flatten_dict_tree(value, fullkeypath))
+        else:
+            newdict[key] = value
+    return newdict
+
+
+def flatten_array_like_strct_gen(arraything, dictvalues=False):
+    for i in arraything:
+        if isinstance(i, _STRINGTYPES):
+            yield i
+        elif isinstance(i, dict):
+            if dictvalues:
+                g = flatten_array_like_strct_gen(flatten_dict_tree(i).values(),
+                                                 dictvalues=dictvalues)
+                for j in g:
+                    yield j
+            else:
+                yield i
+        elif isinstance(i, Iterable):
+            for j in flatten_array_like_strct_gen(i,
+                                                  dictvalues=dictvalues):
+                yield j
+        else:
+            yield i
+
+
+def flatten_handle_all(datastrct, dictvalues=False):
+    if isinstance(datastrct, dict):
+        if not dictvalues:
+            yield datastrct
+        else:
+            for i in flatten_array_like_strct_gen(datastrct.values(),
+                                                  dictvalues=dictvalues):
+                yield i
+    else:
+        for i in flatten_array_like_strct_gen(datastrct,
+                                              dictvalues=dictvalues):
+            yield i
+
+
+def flatten_all(*datastrcts, **xargs):
+    return flatten_handle_all(datastrct=datastrcts, **xargs)
+
+
+def flatten_all_if_true(*datastrcts, **xargs):
+    try:
+        flatten = xargs['flatten']
+    except KeyError:
+        flatten = True
+    if flatten:
+        return flatten_all(*datastrcts, **xargs)
+    else:
+        return datastrcts
