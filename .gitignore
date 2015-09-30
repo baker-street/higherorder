@@ -1,4 +1,5 @@
 *.pyc
+*.pyr
 *.log
 *.sql
 *.sqlite
