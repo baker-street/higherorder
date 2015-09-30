@@ -30,6 +30,14 @@ def always_false(*_, **__):
     return False
 
 
+# -----------------------------------------------------------------------------
+# mess with func attrs
+
+
+def get_attr(func, attr='__name__'):
+    return func.__getattribute__(attr)
+
+
 def _try_assign_name(func, *_, **kwargs):
     try:
         return kwargs['__name__']
@@ -113,11 +121,42 @@ def _try_assign_desc(func, *_, **kwargs):
             return 'NoDesc'
 
 
-def assign_new_var_func_attrs(func, *_, **kwargs):
+# -----------------
+
+
+def _var_to_func_attrs(func, *_, **kwargs):
+    """
+    Do not use directly.
+    Handles manipulation of function attributes.
+    """
     newfunc = deepcopy(func)
+    try:
+        append = kwargs['append']
+    except KeyError:
+        append = False
+    try:
+        prepend = kwargs['prepend']
+    except KeyError:
+        prepend = False
+    if append:
+        def join_prts(old, new):
+            return ''.join([old, new])
+    elif prepend:
+        def join_prts(old, new):
+            return ''.join([new, old])
+    else:
+        def join_prts(old, new):
+            return new
     for k, v in kwargs.items():
-        newfunc.__setattr__(k, v)
+        if k not in {'append', 'prepend'}:
+            newattr = join_prts(old=func.__getattribute__(k),
+                                new = v)
+            newfunc.__setattr__(k, newattr)
     return newfunc
+
+
+def assign_new_var_func_attrs(func, *_, **kwargs):
+    return _var_to_func_attrs(func, append=False, prepend=False, **kwargs)
 
 
 def assign_new_func_attrs(**kwargs):
@@ -128,12 +167,40 @@ def assign_new_func_attrs(**kwargs):
     - can replace or add any attribute. Use with care.
     """
     def _inner(func, *_, **__):
-        return assign_new_var_func_attrs(func=func, **kwargs)
+        return _var_to_func_attrs(func=func, append=False, prepend=False, **kwargs)
     return _inner
 
 
-def get_attr(func, attr='__name__'):
-    return func.__getattribute__(attr)
+def prepend_var_to_func_attrs(func, *_, **kwargs):
+    return _var_to_func_attrs(func, append=False, prepend=True, **kwargs)
+
+
+def prepend_to_func_attrs(**kwargs):
+    """
+    Is a decorator
+    Prepends stuff to existing function attributes (only works with strings)
+    """
+    def _inner(func, *_, **__):
+        return _var_to_func_attrs(func=func, append=False, prepend=True, **kwargs)
+    return _inner
+
+
+def append_var_to_func_attrs(func, *_, **kwargs):
+    return _var_to_func_attrs(func, append=True, prepend=False, **kwargs)
+
+
+def append_to_func_attrs(**kwargs):
+    """
+    Is a decorator
+    Appends stuff to existing function attributes (only works with strings)
+    """
+    def _inner(func, *_, **__):
+        return _var_to_func_attrs(func=func, append=True, prepend=False, **kwargs)
+    return _inner
+
+
+# -----------------------------------------------------------------------------
+# flatten data structures
 
 
 # Try to make the flatten funcs suck a little less; too many loops and what not.

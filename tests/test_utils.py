@@ -43,3 +43,24 @@ def test__try_assign_name():
     assert(the_func.__name__ == 'some_func')
     the_func.__name__ = utils._try_assign_name(the_func, **{'__name__': 'name_two'})
     assert(the_func.__name__ == 'name_two')
+
+
+def test__assign_new_var_func_attrs():
+    def m():
+        pass
+    m = utils.assign_new_var_func_attrs(m, __name__='_and_m')
+    assert(m.__name__ == '_and_m')
+
+
+def test__append_var_to_func_attrs():
+    def m():
+        pass
+    m = utils.append_var_to_func_attrs(m, __name__='_and_m')
+    assert(m.__name__ == 'm_and_m')
+
+
+def test__prepend_var_to_func_attrs():
+    def m():
+        pass
+    m = utils.prepend_var_to_func_attrs(m, __name__='m_and_')
+    assert(m.__name__ == 'm_and_m')

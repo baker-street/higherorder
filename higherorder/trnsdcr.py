@@ -9,6 +9,7 @@ from higherorder.__about__ import *
 from functools import partial
 from collections import defaultdict, namedtuple
 
+from higherorder import utils
 from higherorder.utils import(pass_through,
                               always_true,
                               _try_assign_name,
@@ -79,18 +80,11 @@ def one_layer_tree(head_op, *branch_ops, **bldargs):
     return tree_func
 
 
+@utils.append_to_func_attrs(__doc__=''.join(['\n', '-' * 10, '\n',
+                                             one_layer_tree.__doc__]))
 def one_layer_tree_w_meta(head_op, *branch_ops, **bldargs):
     """
-    - Uses names of functions as key names
-        - if the key names should come from some other attribute of the functions
-          then pass the name of the attribute using the attr key word.
-    ex:
-        head_op - parses sentences.
-        branch_ops - a list of 'tokenizers' that will tokenize the sentences in different ways.
-    It will return something like this:
-        setsdict = {'setone': ['t1', 't2', ..., 'tn'],
-                    'settwo': ['t1', 't2', ..., 'tn'],
-                    }
+    TODO
     """
     funcmeata = {get_attr(head_op, **bldargs): tuple([get_attr(b_op, **bldargs)
                                                      for b_op in branch_ops])}
