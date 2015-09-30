@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
-__title__ = 'fnctional'
+__title__ = 'higherorder'
 __author__ = 'Steven Cutting'
 __author_email__ = 'steven.e.cutting@linux.com'
 __created_on__ = '8/27/2015'
-__copyright__ = "fnctional  Copyright (C) 2015  Steven Cutting"
+__copyright__ = "higherorder  Copyright (C) 2015  Steven Cutting"
 __license__ = "GPLv3"
 __version__ = "0.1.0"
 __maintainer__ = "Steven Cutting"
