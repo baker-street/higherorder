@@ -17,6 +17,8 @@ from higherorder.utils import(pass_through,
                               get_attr,
                               flatten_all_if_true)
 
+__all__ = ['trnsdcr', 'one_layer_tree', 'one_layer_tree_w_meta', 'preiter_iter_postiter']
+
 
 # ------------------------------------------------------------------------------
 # simple transducer
@@ -76,7 +78,7 @@ def one_layer_tree(head_op, *branch_ops, **bldargs):
             posteriordict[get_attr(b_op, **bldargs)] = tuple(branchlist)
         return posteriordict
     tree_func.__name__ = _try_assign_name(func=tree_func, **bldargs)
-    tree_func.__funcs__ =  (head_op, tuple(branch_ops))
+    tree_func.functors = (head_op, tuple(branch_ops))
     return tree_func
 
 
@@ -89,7 +91,7 @@ def one_layer_tree_w_meta(head_op, *branch_ops, **bldargs):
     funcmeata = {get_attr(head_op, **bldargs): tuple([get_attr(b_op, **bldargs)
                                                      for b_op in branch_ops])}
     tree_func = one_layer_tree(head_op, *branch_ops, **bldargs)
-    tree_func.__funcmeta__ = funcmeata
+    tree_func.funcmeta = funcmeata
     return tree_func
 
 

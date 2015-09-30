@@ -157,12 +157,12 @@ def test__one_layer_tree_one__frst_split_period__then_rplc_t__other_rplc_r():
 
 
 def test__one_layer_tree_w_meta():
-    smpl_1.__uuid__ = 'one'
-    smpl_2.__uuid__ = 'two'
-    smpl_3.__uuid__ = 'three'
-    assert(smpl_1.__uuid__ == 'one')
+    smpl_1.uuid = 'one'
+    smpl_2.uuid = 'two'
+    smpl_3.uuid = 'three'
+    assert(smpl_1.uuid == 'one')
     treefunc = one_layer_tree_w_meta(smpl_1, *[smpl_2, smpl_3])
-    assert(treefunc.__funcmeta__ == {'smpl_1': ('smpl_2', 'smpl_3')})
+    assert(treefunc.funcmeta == {'smpl_1': ('smpl_2', 'smpl_3')})
 
 
 def test__one_layer_tree():
@@ -179,10 +179,11 @@ def test__one_layer_tree__two():
     def foo(stuff):
         return stuff
     tree_func = one_layer_tree(foo, smpl_1, smpl_2, smpl_3)
-    assert(tree_func.__funcs__[0].__name__ == 'foo')
-    assert(tree_func.__funcs__[1][0].__name__ == 'smpl_1')
-    assert(tree_func.__funcs__[1][1].__name__ == 'smpl_2')
-    assert(tree_func.__funcs__[1][2].__name__ == 'smpl_3')
+    assert(tree_func.functors[0].__name__ == 'foo')
+    assert(tree_func.functors[1][0].__name__ == 'smpl_1')
+    assert(tree_func.functors[1][1].__name__ == 'smpl_2')
+    assert(tree_func.functors[1][2].__name__ == 'smpl_3')
+
 
 def test__one_layer_tree_w_meta__two():
     def foo(stuff):
@@ -198,8 +199,7 @@ def test__one_layer_tree_w_meta__three():
     def foo(stuff):
         return stuff
     tree_func = one_layer_tree_w_meta(foo, smpl_1, smpl_2, smpl_3)
-    res = tree_func('monkey')
-    assert(tree_func.__funcmeta__ == {'foo': ('smpl_1', 'smpl_2', 'smpl_3')})
+    assert(tree_func.funcmeta == {'foo': ('smpl_1', 'smpl_2', 'smpl_3')})
 
 
 if __name__ == '__main__':
