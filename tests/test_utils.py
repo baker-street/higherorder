@@ -1,11 +1,12 @@
 # -*- coding: utf-8 -*-
-__title__ = 'fnctional'
 __author__ = 'Steven Cutting'
 __author_email__ = 'steven.c.projects@gmail.com'
+__copyright__ = "higherorder  Copyright (C) 2015  Steven Cutting"
 __created_on__ = '9/17/2015'
 
+from higherorder.__about__ import *
 
-from fnctional import utils
+from higherorder import utils
 
 
 def test__pass_through():
@@ -35,11 +36,10 @@ def test__always_false__two():
     assert(utils.always_false(somelist) is False)
 
 
-utils._try_custom_name
-def test__try_custom_name():
+def test__try_assign_name():
     def some_func(*_, **kwargs):
         pass
     the_func = some_func
     assert(the_func.__name__ == 'some_func')
-    the_func.__name__ = utils._try_custom_name(the_func, **{'fncname': 'name_two'})
+    the_func.__name__ = utils._try_assign_name(the_func, **{'__name__': 'name_two'})
     assert(the_func.__name__ == 'name_two')
