@@ -122,6 +122,11 @@ def _try_assign_desc(func, *_, **kwargs):
 
 
 # -----------------
+def _try_kwarg(key, default=False, **kwargs):
+    try:
+        return kwargs[key]
+    except KeyError:
+        return default
 
 
 def _var_to_func_attrs(func, *_, **kwargs):
@@ -130,14 +135,8 @@ def _var_to_func_attrs(func, *_, **kwargs):
     Handles manipulation of function attributes.
     """
     newfunc = deepcopy(func)
-    try:
-        append = kwargs['append']
-    except KeyError:
-        append = False
-    try:
-        prepend = kwargs['prepend']
-    except KeyError:
-        prepend = False
+    append = _try_kwarg('append', **kwargs)
+    prepend = _try_kwarg('prepend', **kwargs)
     if append:
         def join_prts(old, new):
             return ''.join([old, new])
@@ -149,8 +148,12 @@ def _var_to_func_attrs(func, *_, **kwargs):
             return new
     for k, v in kwargs.items():
         if k not in {'append', 'prepend'}:
-            newattr = join_prts(old=func.__getattribute__(k),
-                                new = v)
+            try:
+                oldattr = func.__getattribute__(k)
+            except AttributeError:
+                oldattr = ''
+            newattr = join_prts(old=oldattr,
+                                new=v)
             newfunc.__setattr__(k, newattr)
     return newfunc
 

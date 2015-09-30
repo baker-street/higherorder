@@ -48,8 +48,15 @@ def test__try_assign_name():
 def test__assign_new_var_func_attrs():
     def m():
         pass
-    m = utils.assign_new_var_func_attrs(m, __name__='_and_m')
-    assert(m.__name__ == '_and_m')
+    m = utils.assign_new_var_func_attrs(m, __name__='m_and_m')
+    assert(m.__name__ == 'm_and_m')
+
+
+def test__assign_new_var_func_attrs__two():
+    def m():
+        pass
+    m = utils.assign_new_var_func_attrs(m, __type__='monkey')
+    assert(m.__type__ == 'monkey')
 
 
 def test__append_var_to_func_attrs():
