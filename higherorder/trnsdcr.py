@@ -8,6 +8,7 @@ from higherorder.__about__ import *
 
 from functools import partial
 from collections import defaultdict, namedtuple
+from copy import copy
 
 from higherorder import utils
 from higherorder.utils import(pass_through,
@@ -50,6 +51,29 @@ def trnsdcr(procs, mdl_func=_run_if_not_none, **xargs):
 # ------------------------------------------------------------------------------
 # other transducers
 
+
+def fork(*functors, **bldargs):
+    """
+    Accepts a bunch of functions and creates a new function that will
+    pass it's arguments on to each of the original functions.
+
+    If you want to customize the resulting functions attributes check out:
+        higherorder.utils.prepend_to_func_attrs
+    """
+    def fork_run(operand, *_, **runargs):
+        bldargs.update(runargs)  # bldargs can be overwritten at runtime
+        # fnctrs = copy(functors)
+
+        def inner(func):
+            for op in flatten_all_if_true(operand, **bldargs):
+                yield func(op, **bldargs)
+
+        output = tuple(map(inner, functors))
+        return output
+    fork_run.functors = functors
+    return fork_run
+
+
 def one_layer_tree(head_op, *branch_ops, **bldargs):
     """
     - Uses names of functions as key names
@@ -64,19 +88,15 @@ def one_layer_tree(head_op, *branch_ops, **bldargs):
                     'settwo': ['t1', 't2', ..., 'tn'],
                     }
     """
+    branch_func = fork(*branch_ops, **bldargs)
+
     def tree_func(operand, *_, **runargs):
-        runargs.update(bldargs)
-        firstlayerres = [res for res in flatten_all_if_true(head_op(operand, *_, **runargs),
-                                                            **bldargs)]
-        posteriordict = dict()
-        for b_op in branch_ops:
-            branchlist = [r
-                          for res in firstlayerres
-                          for r in list(flatten_all_if_true(b_op(res), **bldargs))]
-            #  Assumes each branch function will have a differant name.
-            #  Could end up being a big problem.
-            posteriordict[get_attr(b_op, **bldargs)] = tuple(branchlist)
-        return posteriordict
+        bldargs.update(runargs)
+        firstlayerres = list(flatten_all_if_true(head_op(operand, *_, **bldargs),
+                                                 **bldargs))
+        output = branch_func(firstlayerres)
+        return {get_attr(func, **bldargs): out
+                for func, out in zip(branch_ops, output)}
     tree_func.__name__ = _try_assign_name(func=tree_func, **bldargs)
     tree_func.functors = (head_op, tuple(branch_ops))
     return tree_func
