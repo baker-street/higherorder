@@ -158,11 +158,16 @@ def _var_to_func_attrs(func, *_, **kwargs):
     return newfunc
 
 
-def assign_new_var_func_attrs(func, *_, **kwargs):
+def assign_var_func_attrs(func, *_, **kwargs):
+    """
+    Adds custom attributes to a function and can be used to replace
+    standard attributes.
+    - can replace or add any attribute. Use with care.
+    """
     return _var_to_func_attrs(func, append=False, prepend=False, **kwargs)
 
 
-def assign_new_func_attrs(**kwargs):
+def assign_func_attrs(**kwargs):
     """
     Is a decorator
     Adds custom attributes to a function and can be used to replace
