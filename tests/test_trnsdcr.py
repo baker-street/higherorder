@@ -11,7 +11,8 @@ from functools import partial
 from higherorder.trnsdcr import(trnsdcr,
                                 one_layer_tree,
                                 preiter_iter_postiter,
-                                one_layer_tree_w_meta)
+                                one_layer_tree_w_meta,
+                                fork)
 
 
 # -------------------------------------
@@ -170,9 +171,9 @@ def test__one_layer_tree():
         return stuff
     tree_func = one_layer_tree(foo, smpl_1, smpl_2, smpl_3)
     res = tree_func('monkey')
-    assert(res['smpl_1'] == tuple(['monkey_one']))
-    assert(res['smpl_2'] == tuple(['monkey_two']))
-    assert(res['smpl_3'] == tuple(['monkey_three']))
+    assert(tuple(res['smpl_1']) == ('monkey_one',))
+    assert(tuple(res['smpl_2']) == ('monkey_two',))
+    assert(tuple(res['smpl_3']) == ('monkey_three',))
 
 
 def test__one_layer_tree__two():
@@ -190,9 +191,9 @@ def test__one_layer_tree_w_meta__two():
         return stuff
     tree_func = one_layer_tree_w_meta(foo, smpl_1, smpl_2, smpl_3)
     res = tree_func('monkey')
-    assert(res['smpl_1'] == tuple(['monkey_one']))
-    assert(res['smpl_2'] == tuple(['monkey_two']))
-    assert(res['smpl_3'] == tuple(['monkey_three']))
+    assert(tuple(res['smpl_1']) == ('monkey_one',))
+    assert(tuple(res['smpl_2']) == ('monkey_two',))
+    assert(tuple(res['smpl_3']) == ('monkey_three',))
 
 
 def test__one_layer_tree_w_meta__three():
@@ -200,6 +201,14 @@ def test__one_layer_tree_w_meta__three():
         return stuff
     tree_func = one_layer_tree_w_meta(foo, smpl_1, smpl_2, smpl_3)
     assert(tree_func.funcmeta == {'foo': ('smpl_1', 'smpl_2', 'smpl_3')})
+
+
+def test__fork():
+    forked = fork(smpl_1, smpl_2, smpl_3)
+    output = forked('monkey')
+    assert(tuple(output[0]) == ('monkey_one',))
+    assert(tuple(output[1]) == ('monkey_two',))
+    assert(tuple(output[2]) == ('monkey_three',))
 
 
 if __name__ == '__main__':
@@ -215,3 +224,4 @@ if __name__ == '__main__':
     test__one_layer_tree_w_meta()
     test__one_layer_tree()
     test__one_layer_tree_w_meta__two()
+    test__fork()

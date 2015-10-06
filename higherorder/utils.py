@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from __future__ import unicode_literals
 __author__ = 'Steven Cutting'
 __author_email__ = 'steven.e.cutting@linux.com'
 __copyright__ = "higherorder  Copyright (C) 2015  Steven Cutting"
@@ -29,6 +30,21 @@ def always_true(*_, **__):
 def always_false(*_, **__):
     return False
 
+
+def res_and_uuid(res, func):
+    """
+    return {'feature_array': res, 'func_id': func.uuid}
+    """
+    return {u'feature_array': res, u'functor_id': func.uuid}
+
+
+def run_and_return_res_n_uuid(func, *args, **xargs):
+    """
+    res = func(*args, **xargs)
+    return res_and_uuid(res=res, func=func)
+    """
+    res = func(*args, **xargs)
+    return res_and_uuid(res=res, func=func)
 
 # -----------------------------------------------------------------------------
 # mess with func attrs
@@ -154,7 +170,7 @@ def _var_to_func_attrs(func, *_, **kwargs):
                 oldattr = ''
             newattr = join_prts(old=oldattr,
                                 new=v)
-            newfunc.__setattr__(k, newattr)
+            newfunc.__setattr__(k, str(newattr))
     return newfunc
 
 
@@ -246,7 +262,7 @@ def flatten_array_like_strct_gen(arraything, dictvalues=False):
             yield i
 
 
-def flatten_handle_all(datastrct, dictvalues=False):
+def flatten_handle_all(datastrct, dictvalues=False, *_, **__):
     if isinstance(datastrct, dict):
         if not dictvalues:
             yield datastrct

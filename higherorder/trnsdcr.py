@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from __future__ import unicode_literals
 __author__ = 'Steven Cutting'
 __author_email__ = 'steven.e.cutting@linux.com'
 __copyright__ = "higherorder  Copyright (C) 2015  Steven Cutting"
@@ -60,13 +61,18 @@ def fork(*functors, **bldargs):
     If you want to customize the resulting functions attributes check out:
         higherorder.utils.prepend_to_func_attrs
     """
-    def fork_run(operand, *_, **runargs):
+    def fork_run(*operands, **runargs):
         bldargs.update(runargs)  # bldargs can be overwritten at runtime
         # fnctrs = copy(functors)
 
         def inner(func):
-            for op in flatten_all_if_true(operand, **bldargs):
-                yield func(op, **bldargs)
+            if len(operands) == 1:
+                for op in flatten_all_if_true(operands[0], **bldargs):
+                    yield func(op, **bldargs)
+            elif len(operands) < 1:
+                yield func(**bldargs)
+            else:
+                yield func(*operands, **bldargs)
 
         output = tuple(map(inner, functors))
         return output
