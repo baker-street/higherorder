@@ -33,7 +33,7 @@ def always_false(*_, **__):
 
 def res_and_uuid(res, func):
     """
-    return {'feature_array': res, 'func_id': func.uuid}
+    return {u'feature_array': res, u'functor_id': func.uuid}
     """
     return {u'feature_array': res, u'functor_id': func.uuid}
 
