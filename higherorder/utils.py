@@ -4,12 +4,15 @@ __author__ = 'Steven Cutting'
 __author_email__ = 'steven.e.cutting@linux.com'
 __copyright__ = "higherorder  Copyright (C) 2015  Steven Cutting"
 __created_on__ = '9/17/2015'
-
 from higherorder.__about__ import *
+
+import logging
+LOG = logging.getLogger(__name__)
 
 import sys
 from copy import deepcopy
 from collections import Iterable
+import traceback
 
 if sys.version_info[0] < 3:
     _STRINGTYPES = (basestring,)
@@ -31,11 +34,11 @@ def always_false(*_, **__):
     return False
 
 
-def res_and_uuid(res, func):
+def res_and_uuid(res, func, reskey=u'feature_array', funckey=u'feature_set_id'):
     """
     return {u'feature_array': res, u'functor_id': func.uuid}
     """
-    return {u'feature_array': res, u'functor_id': func.uuid}
+    return {reskey: res, funckey: func.uuid}
 
 
 def run_and_return_res_n_uuid(func, *args, **xargs):
@@ -220,6 +223,34 @@ def append_to_func_attrs(**kwargs):
     """
     def _inner(func, *_, **__):
         return _var_to_func_attrs(func=func, append=True, prepend=False, **kwargs)
+    return _inner
+
+
+# -----------------------------------------------------------------------------
+# Error Handling
+
+
+def log_error(dontstop=False, default=None, **kwargs):
+    """
+    A decorator.
+    """
+    def _inner(func, *_, **__):
+        def mod(*args, **xargs):
+            try:
+                return func(*args, **xargs)
+            except:
+                LOG.critical('\t'.join(['Function Failed:\t',
+                                        func.__name__,
+                                        '\tTraceback:',
+                                        str(traceback.format_exc()),
+                                        ]))
+                if dontstop:
+                    return None
+                else:
+                    raise
+        mod.__name__ = func.__name__
+        mod.__doc__ = func.__name__
+        return mod
     return _inner
 
 
