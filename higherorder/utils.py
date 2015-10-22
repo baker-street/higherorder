@@ -13,6 +13,9 @@ import sys
 from copy import deepcopy
 from collections import Iterable
 import traceback
+from json import loads as jloads
+
+from toolz.dicttoolz import dissoc
 
 if sys.version_info[0] < 3:
     _STRINGTYPES = (basestring,)
@@ -20,6 +23,14 @@ else:
     # temp fix, so that 2.7 support wont break
     unicode = str  # adjusting to python3
     _STRINGTYPES = (str, bytes)
+
+
+def xargs_cndm(*ok, **xargs):
+    return {key: value for key, value in xargs.items() if key in ok}
+
+
+def xargs_cndm_loads(ok, **xargs):
+    return xargs_cndm(*jloads(ok), **xargs)
 
 
 def pass_through(obj, *_, **__):
@@ -48,6 +59,15 @@ def run_and_return_res_n_uuid(func, *args, **xargs):
     """
     res = func(*args, **xargs)
     return res_and_uuid(res=res, func=func)
+
+
+def rm_key(rpackiter, *keys):
+    for pack in rpackiter:
+        try:
+            yield dissoc(pack, *keys)
+        except KeyError:
+            yield pack
+
 
 # -----------------------------------------------------------------------------
 # mess with func attrs
@@ -148,32 +168,45 @@ def _try_kwarg(key, default=False, **kwargs):
         return default
 
 
-def _var_to_func_attrs(func, *_, **kwargs):
-    """
-    Do not use directly.
-    Handles manipulation of function attributes.
-    """
-    newfunc = deepcopy(func)
+def _join_prts_fctr(**kwargs):
     append = _try_kwarg('append', **kwargs)
     prepend = _try_kwarg('prepend', **kwargs)
+    nonstr = _try_kwarg('nonstr', **kwargs)
     if append:
         def join_prts(old, new):
             return ''.join([old, new])
     elif prepend:
         def join_prts(old, new):
             return ''.join([new, old])
+    elif nonstr:
+        def join_prts(old, new):
+            return new
     else:
         def join_prts(old, new):
             return new
+    return join_prts
+
+
+def _var_to_func_attrs(func, *_, **kwargs):
+    """
+    Do not use directly.
+    Handles manipulation of function attributes.
+    """
+    newfunc = deepcopy(func)
+    nonstr = _try_kwarg('nonstr', **kwargs)
+    join_prts = _join_prts_fctr(**kwargs)
     for k, v in kwargs.items():
-        if k not in {'append', 'prepend'}:
+        if k not in {'append', 'prepend', 'nonstr'}:
             try:
                 oldattr = func.__getattribute__(k)
             except AttributeError:
                 oldattr = ''
             newattr = join_prts(old=oldattr,
                                 new=v)
-            newfunc.__setattr__(k, str(newattr))
+            if nonstr:
+                newfunc.__setattr__(k, newattr)
+            else:
+                newfunc.__setattr__(k, str(newattr))
     return newfunc
 
 
@@ -195,6 +228,18 @@ def assign_func_attrs(**kwargs):
     """
     def _inner(func, *_, **__):
         return _var_to_func_attrs(func=func, append=False, prepend=False, **kwargs)
+    return _inner
+
+
+def assign_nonstr_func_attrs(**kwargs):
+    """
+    Is a decorator
+    Adds custom attributes to a function and can be used to replace
+    standard attributes.
+    - can replace or add any attribute. Use with care.
+    """
+    def _inner(func, *_, **__):
+        return _var_to_func_attrs(func=func, nonstr=True, append=False, prepend=False, **kwargs)
     return _inner
 
 
@@ -235,22 +280,24 @@ def log_error(dontstop=False, default=None, **kwargs):
     A decorator.
     """
     def _inner(func, *_, **__):
-        def mod(*args, **xargs):
-            try:
-                return func(*args, **xargs)
-            except:
-                LOG.critical('\t'.join(['Function Failed:\t',
-                                        func.__name__,
-                                        '\tTraceback:',
-                                        str(traceback.format_exc()),
-                                        ]))
-                if dontstop:
-                    return None
-                else:
-                    raise
-        mod.__name__ = func.__name__
-        mod.__doc__ = func.__name__
-        return mod
+        def mod(func, *_, **__):
+            def new_func(*args, **xargs):
+                try:
+                    return func(*args, **xargs)
+                except:
+                    LOG.critical('\t'.join(['Function Failed:\t',
+                                            func.__name__,
+                                            '\tTraceback:',
+                                            str(traceback.format_exc()),
+                                            ]))
+                    if dontstop:
+                        return None
+                    else:
+                        raise
+            mod.__name__ = func.__name__
+            mod.__doc__ = func.__name__
+            return new_func
+        return mod(func)
     return _inner
 
 
