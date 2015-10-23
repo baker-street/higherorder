@@ -167,6 +167,8 @@ def _try_kwarg(key, default=False, **kwargs):
     except KeyError:
         return default
 
+try_kwarg = _try_kwarg
+
 
 def _join_prts_fctr(**kwargs):
     append = _try_kwarg('append', **kwargs)
