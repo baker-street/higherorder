@@ -45,6 +45,16 @@ def xargs_find(*find, **xargs):
     raise KeyError('None of the provided keys were found: ' + str(find))
 
 
+def if_keyerror(func, default=False):
+    """
+    Calls func with no arguments, if a KeyError is raised it returns default.
+    """
+    try:
+        return func()
+    except KeyError:
+        return default
+
+
 def pass_through(obj, *_, **__):
     return obj
 
