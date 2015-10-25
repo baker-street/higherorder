@@ -33,6 +33,17 @@ def xargs_cndm_loads(ok, **xargs):
     return xargs_cndm(*jloads(ok), **xargs)
 
 
+def xargs_find(*find, **xargs):
+    """
+    returns the first key in the list that it comes across.
+    """
+    for key in find:
+        try:
+            return xargs[key]
+        except KeyError:
+            continue
+
+
 def pass_through(obj, *_, **__):
     return obj
 
