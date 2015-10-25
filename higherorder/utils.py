@@ -42,6 +42,7 @@ def xargs_find(*find, **xargs):
             return xargs[key]
         except KeyError:
             continue
+    raise KeyError('None of the provided keys were found: ' + str(find))
 
 
 def pass_through(obj, *_, **__):
