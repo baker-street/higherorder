@@ -39,6 +39,18 @@ def xargs_find(*find, **xargs):
     """
     for key in find:
         try:
+            return {key: xargs[key]}
+        except KeyError:
+            continue
+    raise KeyError('None of the provided keys were found: ' + str(find))
+
+
+def xargs_value(*find, **xargs):
+    """
+    returns the value of the first key in the list that it comes across.
+    """
+    for key in find:
+        try:
             return xargs[key]
         except KeyError:
             continue
@@ -53,6 +65,15 @@ def if_keyerror(func, default=False):
         return func()
     except KeyError:
         return default
+
+
+def if_not_key_add(key, default, d):
+    try:
+        d[key]
+        return d
+    except KeyError:
+        d[key] = default
+        return d
 
 
 def pass_through(obj, *_, **__):
