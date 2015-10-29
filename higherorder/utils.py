@@ -10,7 +10,7 @@ import logging
 LOG = logging.getLogger(__name__)
 
 import sys
-from copy import deepcopy
+from copy import deepcopy, copy
 from collections import Iterable
 import traceback
 from json import loads as jloads
@@ -74,6 +74,17 @@ def if_not_key_add(key, default, d):
     except KeyError:
         d[key] = default
         return d
+
+
+def rename_keys(dct, *keytuples):
+    """
+    ex:
+        rename_keys(dct, ('oldkey1', 'newkey1'), ('oldkey2', 'newkey2'))
+    """
+    thedict = copy(dct)
+    for old, new in keytuples:
+        thedict[new] = thedict[old]
+    return dissoc(thedict, *[old for old, new in keytuples])
 
 
 def pass_through(obj, *_, **__):
